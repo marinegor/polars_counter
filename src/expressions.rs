@@ -1,43 +1,42 @@
 #![allow(clippy::unused_unit)]
 use std::fmt::Write;
 
-use polars::chunked_array::ops::arity::unary_elementwise;
 use polars::prelude::*;
 use pyo3::prelude::*;
 use pyo3_polars::derive::polars_expr;
 
 #[pyclass]
 struct Counter {
-    cnt: u16,
+    cnt: i64,
 }
 
 #[pymethods]
 impl Counter {
     #[new]
-    fn new(value: u16) -> Self {
+    fn new(value: i64) -> Self {
         Counter { cnt: value }
     }
 
-    fn emit(&mut self) -> PyResult<u16> {
+    fn emit(&mut self) -> PyResult<i64> {
         Ok(self._emit())
     }
 }
 
 impl Counter {
-    fn _emit(&mut self) -> u16 {
+    fn _emit(&mut self) -> i64 {
         self._consume(1);
         self.cnt + 1
     }
 
-    fn _consume(&mut self, num: u16) {
+    fn _consume(&mut self, num: i64) {
         self.cnt += num;
     }
 }
 
-#[polars_expr(output_type=UInt16)]
+#[polars_expr(output_type=Int64)]
 pub fn plus_one(inputs: &[Series]) -> PolarsResult<Series> {
-    let ca = inputs[0].i16()?;
-    let out: Int16Chunked = ca.apply(|opt_v: Option<i16>| opt_v.map(|v: i16| v + 1));
+    let ca = inputs[0].i64().expect("could not create chunked array");
+    let out: Int64Chunked = ca.apply(|opt_v: Option<i64>| opt_v.map(|v: i64| v + 1));
     Ok(out.into_series())
 }
 
