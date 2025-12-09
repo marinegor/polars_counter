@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 use crate::impl_pickle;
 
 // #[derive(Deserialize, Serialize, Default, Clone, PartialEq, Eq, FromPyObject)]
-#[derive(FromPyObject, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 #[pyclass(name = "Counter", module = "polars_counter")]
 pub struct Counter {
     cnt: i64,
@@ -20,16 +20,18 @@ pub struct Counter {
 #[pymethods]
 impl Counter {
     fn emit(&mut self) -> PyResult<i64> {
+        eprintln!("emit(), self= {:?}", self);
         Ok(self._emit())
     }
+
     #[new]
-    fn new(value: i64) -> Self {
-        eprintln!("__new__");
-        Counter { cnt: value }
+    pub fn new(value: i64) -> PyResult<Self> {
+        eprintln!("__new__, value= {}", value);
+        Ok(Counter { cnt: value })
     }
 
     fn __getnewargs__(&self) -> PyResult<(i64,)> {
-        eprintln!("__getnewargs__");
+        eprintln!("__getnewargs__, self= {:?}", self);
         Ok((self.cnt,))
     }
 }
@@ -58,15 +60,18 @@ impl Counter {
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, FromPyObject)]
 struct PlusNKwargs {
     n: i64,
 }
 
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[pyclass(name = "PlusCounterKwargs", module = "polars_counter")]
 struct PlusCounterKwargs {
     counter: Counter,
 }
+
+impl_pickle!(PlusCounterKwargs);
 
 #[polars_expr(output_type=Int64)]
 pub fn plus_counter(inputs: &[Series], mut kwargs: PlusCounterKwargs) -> PolarsResult<Series> {

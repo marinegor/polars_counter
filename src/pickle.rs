@@ -20,7 +20,7 @@ macro_rules! impl_pickle {
                 &mut self,
                 state: &pyo3::Bound<'_, pyo3::types::PyBytes>,
             ) -> pyo3::PyResult<()> {
-                eprintln!("__setstate__");
+                eprintln!("__setstate__, self={:?}", self);
                 *self = rmp_serde::from_slice(state.as_bytes())
                     .map_err(|e| $crate::errors::CounterError {
                         message: (format!(
@@ -30,6 +30,7 @@ macro_rules! impl_pickle {
                         )),
                     })
                     .unwrap();
+                eprintln!("  state.as_bytes(): {:?}", state.as_bytes());
                 Ok(())
             }
 
@@ -37,7 +38,6 @@ macro_rules! impl_pickle {
                 &self,
                 py: pyo3::Python<'py>,
             ) -> pyo3::PyResult<pyo3::Bound<'py, pyo3::types::PyBytes>> {
-                eprintln!("__getstate__");
                 let state = rmp_serde::to_vec(&self)
                     .map_err(|e| $crate::errors::CounterError {
                         message: (format!(
@@ -48,8 +48,31 @@ macro_rules! impl_pickle {
                     })
                     .ok();
                 let bytes = pyo3::types::PyBytes::new(py, &state.unwrap());
+                eprintln!("__getstate__, self={:?}", self);
+                eprintln!("  bytes: {:?}", bytes);
                 Ok(bytes)
             }
         }
     };
 }
+
+//    fn __getstate__<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyBytes>> {
+//        // Used in pickle/pickling
+//        Ok(PyBytes::new(
+//            py,
+//            &py.enter_polars(|| self.series.read().serialize_to_bytes())?,
+//        ))
+//    }
+//
+//    fn __setstate__(&self, py: Python<'_>, state: Py<PyAny>) -> PyResult<()> {
+//        // Used in pickle/pickling
+//        use pyo3::pybacked::PyBackedBytes;
+//        match state.extract::<PyBackedBytes>(py) {
+//            Ok(bytes) => py.enter_polars(|| {
+//                let mut reader = std::io::Cursor::new(&*bytes);
+//                *self.series.write() = Series::deserialize_from_reader(&mut reader)?;
+//                PolarsResult::Ok(())
+//            }),
+//            Err(e) => Err(e),
+//        }
+//    }
