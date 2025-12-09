@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::impl_pickle;
 
-#[derive(Deserialize, Serialize, Default)]
+#[derive(Deserialize, Serialize, Default, Clone, PartialEq, Eq)]
 #[pyclass(name = "Counter", module = "polars_counter")]
 pub struct Counter {
     cnt: i64,
@@ -18,32 +18,18 @@ pub struct Counter {
 
 #[pymethods]
 impl Counter {
-    #[new]
-    fn new(value: i64) -> Self {
-        Counter { cnt: value }
-    }
-
     fn emit(&mut self) -> PyResult<i64> {
         Ok(self._emit())
     }
-
-    pub fn __getstate__<'py>(&self, py: Python<'py>) -> PyResult<&'py PyBytes> {
-        Ok(PyBytes::new(py, &serialize(&self).unwrap()))
-    }
-
-    pub fn __setstate__(&mut self, state: &PyBytes) -> PyResult<()> {
-        println!("__setstate__");
-        *self = deserialize(state.as_bytes()).unwrap();
-        Ok(())
-    }
-
-    pub fn __getnewargs__(&self) -> PyResult<(i64,)> {
-        println!("__getnewargs__");
-        Ok((self.cnt,))
-    }
 }
 
+impl_pickle!(Counter);
+
 impl Counter {
+    fn from(item: i64) -> Self {
+        Counter { cnt: item }
+    }
+
     fn _emit(&mut self) -> i64 {
         let rv = self.cnt + 1;
         self._consume(1);

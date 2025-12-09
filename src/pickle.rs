@@ -20,13 +20,15 @@ macro_rules! impl_pickle {
                 &mut self,
                 state: &pyo3::Bound<'_, pyo3::types::PyBytes>,
             ) -> pyo3::PyResult<()> {
-                *self = rmp_serde::from_slice(state.as_bytes()).map_err(|e| {
-                    $crate::errors::PyIcechunkStoreError::PickleError(format!(
-                        "Failed to unpickle {}: {}",
-                        stringify!($struct_name),
-                        e.to_string()
-                    ))
-                })?;
+                *self = rmp_serde::from_slice(state.as_bytes())
+                    .map_err(|e| $crate::errors::CounterError {
+                        message: (format!(
+                            "Failed to unpickle {}: {}",
+                            stringify!($struct_name),
+                            e.to_string()
+                        )),
+                    })
+                    .unwrap();
                 Ok(())
             }
 
@@ -34,14 +36,16 @@ macro_rules! impl_pickle {
                 &self,
                 py: pyo3::Python<'py>,
             ) -> pyo3::PyResult<pyo3::Bound<'py, pyo3::types::PyBytes>> {
-                let state = rmp_serde::to_vec(&self).map_err(|e| {
-                    $crate::errors::PyIcechunkStoreError::PickleError(format!(
-                        "Failed to pickle {}: {}",
-                        stringify!($struct_name),
-                        e.to_string()
-                    ))
-                })?;
-                let bytes = pyo3::types::PyBytes::new(py, &state);
+                let state = rmp_serde::to_vec(&self)
+                    .map_err(|e| $crate::errors::CounterError {
+                        message: (format!(
+                            "Failed to unpickle {}: {}",
+                            stringify!($struct_name),
+                            e.to_string()
+                        )),
+                    })
+                    .ok();
+                let bytes = pyo3::types::PyBytes::new(py, &state.unwrap());
                 Ok(bytes)
             }
         }
