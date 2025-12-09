@@ -21,15 +21,15 @@ impl Counter {
     fn emit(&mut self) -> PyResult<i64> {
         Ok(self._emit())
     }
+    #[new]
+    fn new(value: i64) -> Self {
+        Counter { cnt: value }
+    }
 }
 
 impl_pickle!(Counter);
 
 impl Counter {
-    fn from(item: i64) -> Self {
-        Counter { cnt: item }
-    }
-
     fn _emit(&mut self) -> i64 {
         let rv = self.cnt + 1;
         self._consume(1);
