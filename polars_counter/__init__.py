@@ -30,3 +30,13 @@ def plus_one(expr: IntoExprColumn) -> pl.Expr:
         function_name="plus_one",
         is_elementwise=True,
     )
+
+
+def plus_n(expr: IntoExprColumn, *, n: int) -> pl.Expr:
+    return register_plugin_function(
+        args=[expr],
+        plugin_path=LIB,
+        function_name="plus_n",
+        is_elementwise=True,
+        kwargs={"n": n},
+    )

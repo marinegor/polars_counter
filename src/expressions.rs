@@ -4,6 +4,7 @@ use std::fmt::Write;
 use polars::prelude::*;
 use pyo3::prelude::*;
 use pyo3_polars::derive::polars_expr;
+use serde::Deserialize;
 
 #[pyclass]
 struct Counter {
@@ -31,6 +32,18 @@ impl Counter {
     fn _consume(&mut self, num: i64) {
         self.cnt += num;
     }
+}
+
+#[derive(Deserialize)]
+struct PlusNKwargs {
+    n: i64,
+}
+
+#[polars_expr(output_type=Int64)]
+pub fn plus_n(inputs: &[Series], kwargs: PlusNKwargs) -> PolarsResult<Series> {
+    let ca = inputs[0].i64().expect("could not create chunked array");
+    let out: Int64Chunked = ca.apply(|opt_v: Option<i64>| opt_v.map(|v: i64| v + kwargs.n));
+    Ok(out.into_series())
 }
 
 #[polars_expr(output_type=Int64)]

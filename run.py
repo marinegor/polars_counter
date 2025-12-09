@@ -1,5 +1,5 @@
 import polars as pl
-from polars_counter import pig_latinnify, plus_one
+from polars_counter import pig_latinnify, plus_one, plus_n
 
 
 df = pl.DataFrame(
@@ -11,5 +11,6 @@ df = pl.DataFrame(
 result = df.with_columns(
     pig_latin=pig_latinnify("english"),
     pls1=plus_one("number"),
+    pls3=plus_n("number", n=3),
 )
 print(result)
