@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 import polars as pl
 from polars.plugins import register_plugin_function
 
-from polars_counter._internal import __version__ as __version__
+from polars_counter._internal import __version__ as __version__, Counter
 
 if TYPE_CHECKING:
     from polars_counter.typing import IntoExprColumn
@@ -39,4 +39,14 @@ def plus_n(expr: IntoExprColumn, *, n: int) -> pl.Expr:
         function_name="plus_n",
         is_elementwise=True,
         kwargs={"n": n},
+    )
+
+
+def plus_counter(expr: IntoExprColumn, *, counter: Counter) -> pl.Expr:
+    return register_plugin_function(
+        args=[expr],
+        plugin_path=LIB,
+        function_name="plus_counter",
+        is_elementwise=True,
+        kwargs={"counter": counter},
     )
