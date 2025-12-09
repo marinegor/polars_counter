@@ -1,13 +1,17 @@
 #![allow(clippy::unused_unit)]
 use std::fmt::Write;
 
+use bincode::{deserialize, serialize};
 use polars::prelude::*;
 use pyo3::prelude::*;
+use pyo3::types::{PyBytes, PyBytesMethods};
 use pyo3_polars::derive::polars_expr;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize)]
-#[pyclass]
+use crate::impl_pickle;
+
+#[derive(Deserialize, Serialize, Default)]
+#[pyclass(name = "Counter", module = "polars_counter")]
 pub struct Counter {
     cnt: i64,
 }
@@ -21,6 +25,21 @@ impl Counter {
 
     fn emit(&mut self) -> PyResult<i64> {
         Ok(self._emit())
+    }
+
+    pub fn __getstate__<'py>(&self, py: Python<'py>) -> PyResult<&'py PyBytes> {
+        Ok(PyBytes::new(py, &serialize(&self).unwrap()))
+    }
+
+    pub fn __setstate__(&mut self, state: &PyBytes) -> PyResult<()> {
+        println!("__setstate__");
+        *self = deserialize(state.as_bytes()).unwrap();
+        Ok(())
+    }
+
+    pub fn __getnewargs__(&self) -> PyResult<(i64,)> {
+        println!("__getnewargs__");
+        Ok((self.cnt,))
     }
 }
 

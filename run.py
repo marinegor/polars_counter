@@ -1,9 +1,15 @@
+import pickle
 import polars as pl
 from polars_counter import pig_latinnify, plus_one, plus_n, Counter, plus_counter
+import pickle
 
 
 cnt = Counter(0)
-print(cnt.emit())
+print(f"{cnt.emit()=}")
+cnt_re = pickle.loads(pickle.dumps(cnt))
+print(f"{cnt.emit()=}")
+print(f"{cnt_re.emit()=}")
+
 
 df = pl.DataFrame(
     {
