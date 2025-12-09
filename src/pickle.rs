@@ -16,25 +16,15 @@ macro_rules! impl_pickle {
     ($struct_name:ident) => {
         #[pymethods]
         impl $struct_name {
-            pub fn __setstate__(
-                &mut self,
-                state: &pyo3::Bound<'_, pyo3::types::PyBytes>,
-            ) -> pyo3::PyResult<()> {
+            fn __setstate__(&mut self, py: Python<'_>, state: Py<PyAny>) -> pyo3::PyResult<()> {
                 eprintln!("__setstate__, self={:?}", self);
-                *self = rmp_serde::from_slice(state.as_bytes())
-                    .map_err(|e| $crate::errors::CounterError {
-                        message: (format!(
-                            "Failed to unpickle {}: {}",
-                            stringify!($struct_name),
-                            e.to_string()
-                        )),
-                    })
-                    .unwrap();
-                eprintln!("  state.as_bytes(): {:?}", state.as_bytes());
+                use pyo3::pybacked::PyBackedBytes;
+                let bytes = state.extract::<PyBackedBytes>(py)?;
+                *self = rmp_serde::from_slice(&bytes).unwrap();
                 Ok(())
             }
 
-            pub fn __getstate__<'py>(
+            fn __getstate__<'py>(
                 &self,
                 py: pyo3::Python<'py>,
             ) -> pyo3::PyResult<pyo3::Bound<'py, pyo3::types::PyBytes>> {

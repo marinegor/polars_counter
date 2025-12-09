@@ -1,5 +1,5 @@
 __version__: str
 
-class Counter:
+class PyCounter:
     def __init__(self, value: int): ...
     def emit(self): ...

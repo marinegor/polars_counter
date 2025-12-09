@@ -12,7 +12,7 @@ use crate::impl_pickle;
 
 // #[derive(Deserialize, Serialize, Default, Clone, PartialEq, Eq, FromPyObject)]
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[pyclass(name = "Counter", module = "polars_counter")]
+#[pyclass(name = "PyCounter", module = "polars_counter")]
 pub struct Counter {
     cnt: i64,
 }
@@ -34,6 +34,27 @@ impl Counter {
         eprintln!("__getnewargs__, self= {:?}", self);
         Ok((self.cnt,))
     }
+
+    //fn __getstate__<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyBytes>> {
+    //    // Used in pickle/pickling
+    //    Ok(PyBytes::new(
+    //        py,
+    //        &py.enter_polars(|| self.series.read().serialize_to_bytes())?,
+    //    ))
+    //}
+
+    //fn __setstate__(&self, py: Python<'_>, state: Py<PyAny>) -> PyResult<()> {
+    //    // Used in pickle/pickling
+    //    use pyo3::pybacked::PyBackedBytes;
+    //    match state.extract::<PyBackedBytes>(py) {
+    //        Ok(bytes) => py.enter_polars(|| {
+    //            let mut reader = std::io::Cursor::new(&*bytes);
+    //            *self.series.write() = Series::deserialize_from_reader(&mut reader)?;
+    //            PolarsResult::Ok(())
+    //        }),
+    //        Err(e) => Err(e),
+    //    }
+    //}
 }
 
 impl_pickle!(Counter);
@@ -65,7 +86,7 @@ struct PlusNKwargs {
     n: i64,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 #[pyclass(name = "PlusCounterKwargs", module = "polars_counter")]
 struct PlusCounterKwargs {
     counter: Counter,

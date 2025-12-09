@@ -5,13 +5,43 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 from polars.plugins import register_plugin_function
+import json
 
-from polars_counter._internal import __version__ as __version__, Counter
+from polars_counter._internal import __version__ as __version__, PyCounter
 
 if TYPE_CHECKING:
     from polars_counter.typing import IntoExprColumn, IntoExpr
 
 LIB = Path(__file__).parent
+
+
+class Counter:
+    _pyc: PyCounter = None
+
+    def __init__(self, value: int = 0):
+        print(f"__init__, {self=}")
+        self._pyc = PyCounter(value)
+
+    def __getstate__(self) -> bytes:
+        print(f"__getstate__, {self=}")
+        rv = self._pyc.__getstate__()
+        print(f"  {rv=}, {type(rv)=}")
+        return rv
+
+    def __setstate__(self, state: bytes) -> None:
+        print(f"__setstate__, {self=}")
+        self._pyc = Counter()._pyc  # Initialize with a dummy
+        self._pyc.__setstate__(state)
+
+    @classmethod
+    def _from_pyc(cls, _pyc: PyCounter) -> Counter:
+        pyc = cls.__new__(cls)
+        pyc._pyc = _pyc
+        return pyc
+
+    def emit(self):
+        print(f"emit(self), {self=}")
+        self._pyc.emit()
 
 
 def pig_latinnify(expr: IntoExprColumn) -> pl.Expr:
