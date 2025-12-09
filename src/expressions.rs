@@ -12,7 +12,7 @@ use crate::impl_pickle;
 
 // #[derive(Deserialize, Serialize, Default, Clone, PartialEq, Eq, FromPyObject)]
 #[derive(FromPyObject, Serialize, Deserialize)]
-#[pyclass(name = "Counter", module = "polars_counter", dict)]
+#[pyclass(name = "Counter", module = "polars_counter")]
 pub struct Counter {
     cnt: i64,
 }
@@ -24,10 +24,12 @@ impl Counter {
     }
     #[new]
     fn new(value: i64) -> Self {
+        eprintln!("__new__");
         Counter { cnt: value }
     }
 
     fn __getnewargs__(&self) -> PyResult<(i64,)> {
+        eprintln!("__getnewargs__");
         Ok((self.cnt,))
     }
 }
@@ -43,6 +45,16 @@ impl Counter {
 
     fn _consume(&mut self, num: i64) {
         self.cnt += num;
+    }
+
+    fn from(bytes: Vec<u8>) -> Self {
+        let array: [u8; 8] = bytes
+            .try_into()
+            .map_err(|_| "Failed to convert vector into array")
+            .unwrap();
+        Counter {
+            cnt: i64::from_ne_bytes(array),
+        }
     }
 }
 

@@ -9,7 +9,7 @@ from polars.plugins import register_plugin_function
 from polars_counter._internal import __version__ as __version__, Counter
 
 if TYPE_CHECKING:
-    from polars_counter.typing import IntoExprColumn
+    from polars_counter.typing import IntoExprColumn, IntoExpr
 
 LIB = Path(__file__).parent
 
@@ -42,9 +42,9 @@ def plus_n(expr: IntoExprColumn, *, n: int) -> pl.Expr:
     )
 
 
-def plus_counter(expr: IntoExprColumn, *, counter: Counter) -> pl.Expr:
+def plus_counter(expr: IntoExpr, *, counter: Counter) -> pl.Expr:
     return register_plugin_function(
-        args=[expr],
+        args=expr,
         plugin_path=LIB,
         function_name="plus_counter",
         is_elementwise=True,

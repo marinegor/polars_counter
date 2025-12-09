@@ -1,12 +1,22 @@
 import pickle
+
 import polars as pl
-from polars_counter import pig_latinnify, plus_one, plus_n, Counter, plus_counter
-import pickle
 
+from polars_counter import Counter, pig_latinnify, plus_counter, plus_n, plus_one
 
+print("cnt = Counter(0)")
 cnt = Counter(0)
+print("-" * 20)
+
 print(f"{cnt.emit()=}")
-cnt_re = pickle.loads(pickle.dumps(cnt))
+print("-" * 20)
+
+print("dumps = pickle.dumps(cnt)")
+dumps = pickle.dumps(cnt)
+print("cnt_re = pickle.loads(dumps)")
+cnt_re = pickle.loads(dumps)
+print("-" * 20)
+
 print(f"{cnt.emit()=}")
 print(f"{cnt_re.emit()=}")
 
