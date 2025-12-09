@@ -22,3 +22,11 @@ def pig_latinnify(expr: IntoExprColumn) -> pl.Expr:
         is_elementwise=True,
     )
 
+
+def plus_one(expr: IntoExprColumn) -> pl.Expr:
+    return register_plugin_function(
+        args=[expr],
+        plugin_path=LIB,
+        function_name="plus_one",
+        is_elementwise=True,
+    )

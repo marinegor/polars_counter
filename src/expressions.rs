@@ -1,6 +1,7 @@
 #![allow(clippy::unused_unit)]
 use std::fmt::Write;
 
+use polars::chunked_array::ops::arity::unary_elementwise;
 use polars::prelude::*;
 use pyo3::prelude::*;
 use pyo3_polars::derive::polars_expr;
@@ -31,6 +32,13 @@ impl Counter {
     fn _consume(&mut self, num: u16) {
         self.cnt += num;
     }
+}
+
+#[polars_expr(output_type=UInt16)]
+pub fn plus_one(inputs: &[Series]) -> PolarsResult<Series> {
+    let ca = inputs[0].i16()?;
+    let out: Int16Chunked = ca.apply(|opt_v: Option<i16>| opt_v.map(|v: i16| v + 1));
+    Ok(out.into_series())
 }
 
 #[polars_expr(output_type=String)]

@@ -24,6 +24,7 @@ ignore_missing_imports = true
 
 [dependency-groups]
 dev = [
+    "maturin>=1.10.2",
     "pytest>=8.3.5",
     "ruff>=0.14.8",
     "ty>=0.0.1a32",
