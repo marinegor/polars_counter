@@ -4,14 +4,15 @@ use std::fmt::Write;
 use bincode::{deserialize, serialize};
 use polars::prelude::*;
 use pyo3::prelude::*;
-use pyo3::types::{PyBytes, PyBytesMethods};
+use pyo3::types::{PyBytes, PyBytesMethods, PyInt};
 use pyo3_polars::derive::polars_expr;
 use serde::{Deserialize, Serialize};
 
 use crate::impl_pickle;
 
-#[derive(Deserialize, Serialize, Default, Clone, PartialEq, Eq)]
-#[pyclass(name = "Counter", module = "polars_counter")]
+// #[derive(Deserialize, Serialize, Default, Clone, PartialEq, Eq, FromPyObject)]
+#[derive(FromPyObject, Serialize, Deserialize)]
+#[pyclass(name = "Counter", module = "polars_counter", dict)]
 pub struct Counter {
     cnt: i64,
 }
@@ -24,6 +25,10 @@ impl Counter {
     #[new]
     fn new(value: i64) -> Self {
         Counter { cnt: value }
+    }
+
+    fn __getnewargs__(&self) -> PyResult<(i64,)> {
+        Ok((self.cnt,))
     }
 }
 
