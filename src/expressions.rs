@@ -1,7 +1,37 @@
 #![allow(clippy::unused_unit)]
-use polars::prelude::*;
-use pyo3_polars::derive::polars_expr;
 use std::fmt::Write;
+
+use polars::prelude::*;
+use pyo3::prelude::*;
+use pyo3_polars::derive::polars_expr;
+
+#[pyclass]
+struct Counter {
+    cnt: u16,
+}
+
+#[pymethods]
+impl Counter {
+    #[new]
+    fn new(value: u16) -> Self {
+        Counter { cnt: value }
+    }
+
+    fn emit(&mut self) -> PyResult<u16> {
+        Ok(self._emit())
+    }
+}
+
+impl Counter {
+    fn _emit(&mut self) -> u16 {
+        self._consume(1);
+        self.cnt + 1
+    }
+
+    fn _consume(&mut self, num: u16) {
+        self.cnt += num;
+    }
+}
 
 #[polars_expr(output_type=String)]
 fn pig_latinnify(inputs: &[Series]) -> PolarsResult<Series> {
