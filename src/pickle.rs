@@ -20,7 +20,8 @@ macro_rules! impl_pickle {
                 eprintln!("__setstate__, self={:?}", self);
                 use pyo3::pybacked::PyBackedBytes;
                 let bytes = state.extract::<PyBackedBytes>(py)?;
-                *self = serde_pickle::from_slice(&bytes).unwrap();
+                *self = serde_pickle::from_slice(&bytes, serde_pickle::de::DeOptions::default())
+                    .unwrap();
                 Ok(())
             }
 
@@ -28,7 +29,7 @@ macro_rules! impl_pickle {
                 &self,
                 py: pyo3::Python<'py>,
             ) -> pyo3::PyResult<pyo3::Bound<'py, pyo3::types::PyBytes>> {
-                let state = serde_pickle::to_vec(&self, true)
+                let state = serde_pickle::to_vec(&self, serde_pickle::ser::SerOptions::default())
                     .map_err(|e| $crate::errors::CounterError {
                         message: (format!(
                             "Failed to unpickle {}: {}",

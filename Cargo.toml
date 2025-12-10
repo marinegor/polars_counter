@@ -22,4 +22,4 @@ pyo3-polars = { version = "0.25.0", features = [
 serde = { version = "1", features = ["derive"] }
 polars = { version = "0.52.0", default-features = false }
 polars-arrow = { version = "0.52.0", default-features = false }
-serde-pickle = { version = "<1.2.0" }
+serde-pickle = { version = "1.0.0" }

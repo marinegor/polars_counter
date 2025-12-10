@@ -1033,12 +1033,6 @@ dependencies = [
 
 [[package]]
 name = "iter-read"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c397ca3ea05ad509c4ec451fea28b4771236a376ca1c69fd5143aae0cf8f93c4"
-
-[[package]]
-name = "iter-read"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "071ed4cc1afd86650602c7b11aa2e1ce30762a1c27193201cb5cee9c6ebb1294"
@@ -1194,17 +1188,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6d89e9874397a1f0a52fc1f197a8effd9735223cb2390e9dcc83ac6cd02923d0"
 dependencies = [
  "chrono",
-]
-
-[[package]]
-name = "num-bigint"
-version = "0.3.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5f6f7833f2cbf2360a6cfd58cd41a53aa7a90bd4c202f5b1c7dd2ed73c57b2c3"
-dependencies = [
- "autocfg",
- "num-integer",
- "num-traits",
 ]
 
 [[package]]
@@ -1507,7 +1490,7 @@ dependencies = [
  "pyo3",
  "pyo3-polars",
  "serde",
- "serde-pickle 0.6.3",
+ "serde-pickle",
 ]
 
 [[package]]
@@ -1996,7 +1979,7 @@ dependencies = [
  "pyo3",
  "pyo3-polars-derive",
  "serde",
- "serde-pickle 1.2.0",
+ "serde-pickle",
  "thiserror 1.0.69",
 ]
 
@@ -2436,26 +2419,13 @@ dependencies = [
 
 [[package]]
 name = "serde-pickle"
-version = "0.6.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9b88454094f5ba5b2149722f41e42395b39556632c3abb068540c0b04d27017a"
-dependencies = [
- "byteorder",
- "iter-read 0.3.1",
- "num-bigint 0.3.3",
- "num-traits",
- "serde",
-]
-
-[[package]]
-name = "serde-pickle"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b641fdc8bcf2781ee78b30c599700d64ad4f412976143e4c5d0b9df906bb4843"
 dependencies = [
  "byteorder",
- "iter-read 1.1.0",
- "num-bigint 0.4.6",
+ "iter-read",
+ "num-bigint",
  "num-traits",
  "serde",
 ]
