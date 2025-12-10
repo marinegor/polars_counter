@@ -1,3 +1,4 @@
+// the code below is modified from here: https://github.com/earth-mover/icechunk/blob/4bcf8065a65779d124556497d5245ee1db580ca4/icechunk-python/src/pickle.rs
 /// macro to implement the necessary methods to pickle and unpickle a python
 /// bound object in pyo3.
 ///
@@ -46,24 +47,3 @@ macro_rules! impl_pickle {
         }
     };
 }
-
-//    fn __getstate__<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyBytes>> {
-//        // Used in pickle/pickling
-//        Ok(PyBytes::new(
-//            py,
-//            &py.enter_polars(|| self.series.read().serialize_to_bytes())?,
-//        ))
-//    }
-//
-//    fn __setstate__(&self, py: Python<'_>, state: Py<PyAny>) -> PyResult<()> {
-//        // Used in pickle/pickling
-//        use pyo3::pybacked::PyBackedBytes;
-//        match state.extract::<PyBackedBytes>(py) {
-//            Ok(bytes) => py.enter_polars(|| {
-//                let mut reader = std::io::Cursor::new(&*bytes);
-//                *self.series.write() = Series::deserialize_from_reader(&mut reader)?;
-//                PolarsResult::Ok(())
-//            }),
-//            Err(e) => Err(e),
-//        }
-//    }
