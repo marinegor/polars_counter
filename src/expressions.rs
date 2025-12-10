@@ -7,7 +7,14 @@ use pyo3::types::{PyBytes, PyBytesMethods, PyInt};
 use pyo3_polars::derive::polars_expr;
 use serde::{Deserialize, Serialize};
 
-use crate::impl_pickle;
+mod errors {
+    use serde::{Deserialize, Serialize};
+
+    #[derive(Serialize, Deserialize, Debug)]
+    pub struct CounterError {
+        pub message: String,
+    }
+}
 
 // #[derive(Deserialize, Serialize, Default, Clone, PartialEq, Eq, FromPyObject)]
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -34,6 +41,33 @@ impl Counter {
         Ok((self.cnt,))
     }
 
+    fn __setstate__(&mut self, py: Python<'_>, state: Py<PyAny>) -> pyo3::PyResult<()> {
+        eprintln!("__setstate__, self={:?}", self);
+        use pyo3::pybacked::PyBackedBytes;
+        let bytes = state.extract::<PyBackedBytes>(py)?;
+        *self = serde_pickle::from_slice(&bytes, serde_pickle::de::DeOptions::default()).unwrap();
+        Ok(())
+    }
+
+    fn __getstate__<'py>(
+        &self,
+        py: pyo3::Python<'py>,
+    ) -> pyo3::PyResult<pyo3::Bound<'py, pyo3::types::PyBytes>> {
+        let state = serde_pickle::to_vec(&self, serde_pickle::ser::SerOptions::default())
+            .map_err(|e| errors::CounterError {
+                message: (format!(
+                    "Failed to unpickle {}: {}",
+                    stringify!($struct_name),
+                    e.to_string()
+                )),
+            })
+            .ok();
+        let bytes = pyo3::types::PyBytes::new(py, &state.unwrap());
+        eprintln!("__getstate__, self={:?}", self);
+        eprintln!("  bytes: {:?}", bytes);
+        Ok(bytes)
+    }
+
     //fn __getstate__<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyBytes>> {
     //    // Used in pickle/pickling
     //    Ok(PyBytes::new(
@@ -55,8 +89,6 @@ impl Counter {
     //    }
     //}
 }
-
-impl_pickle!(Counter);
 
 impl Counter {
     fn _emit(&mut self) -> i64 {
@@ -90,8 +122,6 @@ struct PlusNKwargs {
 struct PlusCounterKwargs {
     counter: Counter,
 }
-
-impl_pickle!(PlusCounterKwargs);
 
 #[polars_expr(output_type=Int64)]
 pub fn plus_counter(inputs: &[Series], mut kwargs: PlusCounterKwargs) -> PolarsResult<Series> {

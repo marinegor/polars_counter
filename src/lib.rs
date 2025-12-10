@@ -12,12 +12,3 @@ fn _internal(_py: Python, m: &Bound<PyModule>) -> PyResult<()> {
 
 #[global_allocator]
 static ALLOC: PolarsAllocator = PolarsAllocator::new();
-
-mod errors {
-    use serde::{Deserialize, Serialize};
-
-    #[derive(Serialize, Deserialize, Debug)]
-    pub struct CounterError {
-        pub message: String,
-    }
-}
