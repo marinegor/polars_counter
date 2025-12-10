@@ -3,7 +3,6 @@ use std::fmt::Write;
 
 use polars::prelude::*;
 use pyo3::prelude::*;
-use pyo3::types::{PyBytes, PyBytesMethods, PyInt};
 use pyo3_polars::derive::polars_expr;
 use serde::{Deserialize, Serialize};
 
