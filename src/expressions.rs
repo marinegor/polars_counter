@@ -66,27 +66,6 @@ impl Counter {
         eprintln!("  bytes: {:?}", bytes);
         Ok(bytes)
     }
-
-    //fn __getstate__<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyBytes>> {
-    //    // Used in pickle/pickling
-    //    Ok(PyBytes::new(
-    //        py,
-    //        &py.enter_polars(|| self.series.read().serialize_to_bytes())?,
-    //    ))
-    //}
-
-    //fn __setstate__(&self, py: Python<'_>, state: Py<PyAny>) -> PyResult<()> {
-    //    // Used in pickle/pickling
-    //    use pyo3::pybacked::PyBackedBytes;
-    //    match state.extract::<PyBackedBytes>(py) {
-    //        Ok(bytes) => py.enter_polars(|| {
-    //            let mut reader = std::io::Cursor::new(&*bytes);
-    //            *self.series.write() = Series::deserialize_from_reader(&mut reader)?;
-    //            PolarsResult::Ok(())
-    //        }),
-    //        Err(e) => Err(e),
-    //    }
-    //}
 }
 
 impl Counter {
@@ -99,24 +78,14 @@ impl Counter {
     fn _consume(&mut self, num: i64) {
         self.cnt += num;
     }
-
-    fn from(bytes: Vec<u8>) -> Self {
-        let array: [u8; 8] = bytes
-            .try_into()
-            .map_err(|_| "Failed to convert vector into array")
-            .unwrap();
-        Counter {
-            cnt: i64::from_ne_bytes(array),
-        }
-    }
 }
 
-#[derive(Deserialize, FromPyObject)]
+#[derive(Deserialize, FromPyObject, Clone)]
 struct PlusNKwargs {
     n: i64,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[pyclass(name = "PlusCounterKwargs", module = "polars_counter")]
 struct PlusCounterKwargs {
     counter: Counter,
