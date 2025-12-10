@@ -2,7 +2,7 @@ import pickle
 
 import polars as pl
 
-from polars_counter import Counter, pig_latinnify, plus_counter, plus_n, plus_one
+from polars_counter import Counter
 
 print("==" * 20)
 print("= " * 10, "Starting run", " =" * 20)
@@ -33,18 +33,3 @@ with open("tuple.pickle", "wb") as fout:
     pickle.dump((1, 2, 3), fout, protocol=5)
 with open("dict.pickle", "wb") as fout:
     pickle.dump({1: "foo", 2: "bar", "baz": 3}, fout, protocol=5)
-
-print("-" * 20)
-df = pl.DataFrame(
-    {
-        "english": ["this", "is", "not", "pig", "latin"],
-        "number": pl.Series([1, 2, 3, 4, 5]),
-    }
-)
-result = df.with_columns(
-    # pig_latin=pig_latinnify("english"),
-    # pls1=plus_one("number"),
-    # pls3=plus_n("number", n=3),
-    emit=plus_counter("number", counter=cnt),
-)
-print(result)
