@@ -18,6 +18,11 @@ LIB = Path(__file__).parent
 class Counter:
     _pyc: PyCounter = None
 
+    def __new__(cls, *args, **kwargs):
+        print(f"__new__, {args=} {kwargs=}")
+        instance = super(Counter, cls).__new__(cls)
+        return instance
+
     def __init__(self, value: int = 0):
         print(f"__init__, {self=}")
         self._pyc = PyCounter(value)
@@ -39,9 +44,9 @@ class Counter:
         pyc._pyc = _pyc
         return pyc
 
-    def emit(self):
+    def emit(self) -> int:
         print(f"emit(self), {self=}")
-        self._pyc.emit()
+        return self._pyc.emit()
 
 
 def pig_latinnify(expr: IntoExprColumn) -> pl.Expr:

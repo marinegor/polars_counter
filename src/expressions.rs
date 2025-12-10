@@ -1,7 +1,6 @@
 #![allow(clippy::unused_unit)]
 use std::fmt::Write;
 
-use bincode::{deserialize, serialize};
 use polars::prelude::*;
 use pyo3::prelude::*;
 use pyo3::types::{PyBytes, PyBytesMethods, PyInt};

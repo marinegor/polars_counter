@@ -33,9 +33,9 @@ df = pl.DataFrame(
     }
 )
 result = df.with_columns(
-    pig_latin=pig_latinnify("english"),
-    pls1=plus_one("number"),
-    pls3=plus_n("number", n=3),
+    # pig_latin=pig_latinnify("english"),
+    # pls1=plus_one("number"),
+    # pls3=plus_n("number", n=3),
     emit=plus_counter("number", counter=cnt),
 )
 print(result)
