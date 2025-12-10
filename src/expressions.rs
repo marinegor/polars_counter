@@ -5,6 +5,7 @@ use polars::prelude::*;
 use pyo3::prelude::*;
 use pyo3_polars::derive::polars_expr;
 use serde::{Deserialize, Serialize};
+use serde_pickle::Value;
 
 mod errors {
     use serde::{Deserialize, Serialize};
@@ -42,6 +43,7 @@ impl Counter {
 
     fn __setstate__(&mut self, py: Python<'_>, state: Py<PyAny>) -> pyo3::PyResult<()> {
         eprintln!("__setstate__, self={:?}", self);
+        eprintln!("__setstate__, state={:?}", state);
         use pyo3::pybacked::PyBackedBytes;
         let bytes = state.extract::<PyBackedBytes>(py)?;
         *self = serde_pickle::from_slice(&bytes, serde_pickle::de::DeOptions::default()).unwrap();

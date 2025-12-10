@@ -10,7 +10,7 @@ uv sync
 Create pickle files:
 
 ```
-uv run create_pickles.py
+maturin develop && uv run create_pickles.py
 ```
 
 It'll produce multiple pickle files, and then you can run:
@@ -27,5 +27,5 @@ done
 If you wanna check polars expr, run
 
 ```
-uv run run_polars_expr.py
+maturin develop && uv run run_polars_expr.py
 ```
