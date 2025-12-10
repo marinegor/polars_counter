@@ -25,6 +25,15 @@ print(f"{cnt.emit()=}")
 print(f"{cnt_re.emit()=}")
 
 
+with open("py_counter.pickle", "wb") as fout:
+    pickle.dump(cnt, fout, protocol=5)
+with open("rust_counter.pickle", "wb") as fout:
+    pickle.dump(cnt._pyc, fout, protocol=5)
+with open("tuple.pickle", "wb") as fout:
+    pickle.dump((1, 2, 3), fout, protocol=5)
+with open("dict.pickle", "wb") as fout:
+    pickle.dump({1: "foo", 2: "bar", "baz": 3}, fout, protocol=5)
+
 print("-" * 20)
 df = pl.DataFrame(
     {
