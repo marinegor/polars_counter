@@ -5,7 +5,6 @@ use polars::prelude::*;
 use pyo3::prelude::*;
 use pyo3_polars::derive::polars_expr;
 use serde::{Deserialize, Serialize};
-use serde_pickle::Value;
 
 mod errors {
     use serde::{Deserialize, Serialize};
@@ -17,10 +16,54 @@ mod errors {
 }
 
 // #[derive(Deserialize, Serialize, Default, Clone, PartialEq, Eq, FromPyObject)]
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Clone, Debug)]
 #[pyclass(name = "PyCounter", module = "polars_counter")]
 pub struct Counter {
     cnt: i64,
+}
+
+impl serde::Serialize for Counter {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let bytes = bincode::serialize(&self.cnt).map_err(serde::ser::Error::custom)?;
+        serializer.serialize_bytes(&bytes)
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for Counter {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        struct FieldVisitor;
+
+        impl<'de> serde::de::Visitor<'de> for FieldVisitor {
+            type Value = Counter;
+            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                formatter.write_str(concat!(
+                    "a byte array containing bincode-serialized ",
+                    stringify!(MyClass),
+                    " data"
+                ))
+            }
+            fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
+            where
+                E: serde::de::Error,
+            {
+                let cnt: i64 = bincode::deserialize(v).map_err(serde::de::Error::custom)?;
+                Ok(Counter { cnt })
+            }
+            fn visit_byte_buf<E>(self, v: Vec<u8>) -> Result<Self::Value, E>
+            where
+                E: serde::de::Error,
+            {
+                self.visit_bytes(&v)
+            }
+        }
+        deserializer.deserialize_bytes(FieldVisitor)
+    }
 }
 
 #[pymethods]
@@ -36,37 +79,25 @@ impl Counter {
         Ok(Counter { cnt: value })
     }
 
-    fn __getnewargs__(&self) -> PyResult<(i64,)> {
-        eprintln!("__getnewargs__, self= {:?}", self);
-        Ok((self.cnt,))
-    }
-
-    fn __setstate__(&mut self, py: Python<'_>, state: Py<PyAny>) -> pyo3::PyResult<()> {
-        eprintln!("__setstate__, self={:?}", self);
-        eprintln!("__setstate__, state={:?}", state);
-        use pyo3::pybacked::PyBackedBytes;
-        let bytes = state.extract::<PyBackedBytes>(py)?;
-        *self = serde_pickle::from_slice(&bytes, serde_pickle::de::DeOptions::default()).unwrap();
+    pub fn __setstate__(
+        &mut self,
+        state: &pyo3::Bound<'_, pyo3::types::PyBytes>,
+    ) -> pyo3::PyResult<()> {
+        self.cnt = bincode::deserialize(state.as_bytes()).unwrap();
         Ok(())
     }
 
-    fn __getstate__<'py>(
+    pub fn __getstate__<'py>(
         &self,
         py: pyo3::Python<'py>,
     ) -> pyo3::PyResult<pyo3::Bound<'py, pyo3::types::PyBytes>> {
-        let state = serde_pickle::to_vec(&self, serde_pickle::ser::SerOptions::default())
-            .map_err(|e| errors::CounterError {
-                message: (format!(
-                    "Failed to unpickle {}: {}",
-                    stringify!($struct_name),
-                    e.to_string()
-                )),
-            })
-            .ok();
-        let bytes = pyo3::types::PyBytes::new(py, &state.unwrap());
-        eprintln!("__getstate__, self={:?}", self);
-        eprintln!("  bytes: {:?}", bytes);
-        Ok(bytes)
+        Ok(pyo3::types::PyBytes::new(
+            py,
+            &bincode::serialize(&self.cnt).unwrap(),
+        ))
+    }
+    pub fn __getnewargs__(&self) -> pyo3::PyResult<(i64,)> {
+        Ok((self.cnt.clone(),))
     }
 }
 
